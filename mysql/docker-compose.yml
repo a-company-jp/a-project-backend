@@ -8,7 +8,7 @@ services:
     volumes:
       - ./my.cnf:/etc/mysql/conf.d/my.cnf
       - ./init:/docker-entrypoint-initdb.d
-      - proxyCollectionVolume:/var/lib/mysql
+      - OpenHackUADev:/var/lib/mysql
     env_file:
       - .env
     environment:
@@ -19,4 +19,4 @@ services:
     restart: always
     tty: true
 volumes:
-  proxyCollectionVolume:
+  OpenHackUADev:
