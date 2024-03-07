@@ -1,0 +1,39 @@
+name: Migration Consistency Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'mysql/migrations/*.sql'
+      - 'cmd/migration_check/*'
+      - '.github/workflows/migration_check.yml'
+
+jobs:
+  check-migration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_USER: ci
+          MYSQL_PASSWORD: github
+          MYSQL_ROOT_PASSWORD: github
+          MYSQL_DATABASE: migrate
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h localhost" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '^1.21'
+
+    - name: Execute migration_check
+      run: go run ./cmd/migration_check

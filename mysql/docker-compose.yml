@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  mysql-server:
+    image: mysql:8.0
+    ports:
+      - ${DB_PORT}:3306
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./init:/docker-entrypoint-initdb.d
+      - proxyCollectionVolume:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    restart: always
+    tty: true
+volumes:
+  proxyCollectionVolume:
