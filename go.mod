@@ -5,7 +5,9 @@ go 1.22.0
 require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/joho/godotenv v1.5.1
 	github.com/sergi/go-diff v1.3.1
+	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.4
 	gorm.io/gen v0.3.25
 	gorm.io/gorm v1.25.7
