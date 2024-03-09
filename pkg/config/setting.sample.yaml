@@ -1,0 +1,28 @@
+application:
+  server:
+    on_production:
+    frontend:
+      protocol: https://
+      domain: shion.pro
+      port: 443
+    backend:
+      protocol: https://
+      domain: shion.pro
+      port: 1305
+  gcs:
+    bucket_name: sample-bucket-name
+infrastructure:
+  google_cloud:
+    project_id: some-project-id
+    use_credentials_file: true
+    credentials_file_path: /dev/null
+  mysql:
+    host: localhost
+    port: 1234
+    username: shion
+    password: ifeelluckytoday
+    database: shionDB
+third_party:
+service:
+  authentication:
+    jwt_secret: "LEN32_AUTH_CIPHER_KEY_TEST_TOKEN"

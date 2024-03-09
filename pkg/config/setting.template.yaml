@@ -1,0 +1,28 @@
+application:
+  server:
+    on_production:
+    frontend:
+      protocol:
+      domain:
+      port:
+    backend:
+      protocol:
+      domain:
+      port:
+  gcs:
+    bucket_name:
+infrastructure:
+  google_cloud:
+    project_id:
+    use_credentials_file:
+    credentials_file_path:
+  mysql:
+    host:
+    port:
+    username:
+    password:
+    database:
+third_party:
+service:
+  authentication:
+    jwt_secret:
