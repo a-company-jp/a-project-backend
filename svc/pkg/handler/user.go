@@ -23,7 +23,7 @@ func NewUser(userQ query.User) User {
 func (u User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := user.ID(c.Param("user_id"))
-		_, err := u.userQ.GetUserByID(userID)
+		u, err := u.userQ.GetByID(userID)
 		if err != nil {
 			if errors.Is(err, exception.ErrNotFound) {
 				c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
@@ -34,8 +34,8 @@ func (u User) GetUserInfo() gin.HandlerFunc {
 		// TODO: create response using protobuf struct
 		resp := pb_out.UserInfoResponse{
 			UserData: &pb_out.UserData{
-				UserId:        "96366846-918a-45d9-a7e3-a382c0687ef4",
-				Username:      "Shion1305",
+				UserId:        string(u.UserId),
+				Username:      u.Username,
 				Firstname:     "詩恩",
 				Lastname:      "市川",
 				FirstnameKana: "Shion",
