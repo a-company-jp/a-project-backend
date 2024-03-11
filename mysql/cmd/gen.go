@@ -1,8 +1,10 @@
 package main
 
 import (
+	"a-project-backend/db/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 )
 
@@ -23,8 +25,21 @@ func main() {
 	}
 
 	g.UseDB(db)
+	g.Execute()
 	all := g.GenerateAllTable() // database to table model.
 
+	all = append(all, g.GenerateModel(
+		model.TableNameUser,
+		gen.FieldRelateModel(
+			field.Many2Many,
+			"Tags",
+			model.UserTag{},
+			&field.RelateConfig{
+				RelateSlice: true,
+				GORMTag: field.GormTag{}.
+					Set("many2many", "user_tags"),
+			}),
+	))
 	g.ApplyBasic(all...)
 
 	// Generate the code
