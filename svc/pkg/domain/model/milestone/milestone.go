@@ -1,4 +1,4 @@
-package event
+package milestone
 
 import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
@@ -6,8 +6,10 @@ import (
 )
 
 type ID string
+type UserID user.ID
+type ImageID string
 
-type Event struct {
+type Milestone struct {
 	ID         ID
 	UserID     user.ID
 	Title      string
@@ -16,5 +18,3 @@ type Event struct {
 	BeginDate  pkg_time.DateOnly
 	FinishDate pkg_time.DateOnly
 }
-
-type ImageID string
