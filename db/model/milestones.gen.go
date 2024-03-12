@@ -8,13 +8,13 @@ const TableNameMilestone = "Milestones"
 
 // Milestone mapped from table <Milestones>
 type Milestone struct {
-	MilestoneID string  `gorm:"column:milestone_id;type:varchar(255);primaryKey" json:"milestone_id"`
-	UserID      *string `gorm:"column:user_id;type:varchar(255);index:user_id,priority:1" json:"user_id"`
-	Title       string  `gorm:"column:title;type:varchar(255);not null" json:"title"`
-	Content     *string `gorm:"column:content;type:text" json:"content"`
-	ImageHash   *string `gorm:"column:image_hash;type:varchar(255)" json:"image_hash"`
-	BeginDate   *int32  `gorm:"column:begin_date;type:int" json:"begin_date"`
-	FinishDate  *int32  `gorm:"column:finish_date;type:int" json:"finish_date"`
+	MilestoneID string `gorm:"column:milestone_id;type:varchar(255);primaryKey" json:"milestone_id"`
+	UserID      string `gorm:"column:user_id;type:varchar(255);not null;index:user_id,priority:1" json:"user_id"`
+	Title       string `gorm:"column:title;type:varchar(255);not null" json:"title"`
+	Content     string `gorm:"column:content;type:text;not null" json:"content"`
+	ImageHash   string `gorm:"column:image_hash;type:varchar(255);not null" json:"image_hash"`
+	BeginDate   int32  `gorm:"column:begin_date;type:int;not null" json:"begin_date"`
+	FinishDate  int32  `gorm:"column:finish_date;type:int;not null" json:"finish_date"`
 }
 
 // TableName Milestone's table name
