@@ -81,3 +81,46 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 		c.Data(201, "application/octet-stream", respData)
 	}
 }
+
+// UpdateMileStone マイルストーンの更新
+func (m MileStone) UpdateMileStone() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		data, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		var milestoneUpdateRequest pb_out.MilestoneUpdateRequest
+		err = proto.Unmarshal(data, &milestoneUpdateRequest)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+		if milestoneUpdateRequest.Milestone.MilestoneId != "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "milestone id is not empty"})
+		}
+
+		beginDate, err := pkg_time.FromString(milestoneUpdateRequest.Milestone.BeginDate)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+		finishDate, err := pkg_time.FromString(milestoneUpdateRequest.Milestone.FinishDate)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+		target := milestone.Milestone{
+			ID:         milestone.ID(""),
+			UserID:     user.ID(milestoneUpdateRequest.Milestone.UserId),
+			Title:      milestoneUpdateRequest.Milestone.Title,
+			Content:    milestoneUpdateRequest.Milestone.Content,
+			ImageID:    milestone.ImageID(milestoneUpdateRequest.Milestone.ImageHash),
+			BeginDate:  beginDate,
+			FinishDate: finishDate,
+		}
+		err = m.mileStoneCommand.Update(target)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		c.Data(201, "application/octet-stream", nil)
+	}
+}
