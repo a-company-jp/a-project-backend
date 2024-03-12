@@ -5,6 +5,7 @@ import (
 	"a-project-backend/svc/pkg/domain/model/milestone"
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"a-project-backend/svc/pkg/domain/model/user"
+	"io"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
@@ -24,14 +25,13 @@ func NewMileStone(mileStoneCommand command.Milestone) MileStone {
 // PostMileStone マイルストーンの作成
 func (m MileStone) PostMileStone() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var buf []byte
-		n, err := c.Request.Body.Read(buf)
+		data, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
 		var milestoneCreateRequest pb_out.MilestoneCreateRequest
-		err = proto.Unmarshal(buf[0:n], &milestoneCreateRequest)
+		err = proto.Unmarshal(data, &milestoneCreateRequest)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
