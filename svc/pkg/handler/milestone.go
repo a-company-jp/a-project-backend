@@ -32,7 +32,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 
 		var milestoneCreateRequest pb_out.MilestoneCreateRequest
 		err = proto.Unmarshal(data, &milestoneCreateRequest)
-		if err != nil {
+		if err != nil || milestoneCreateRequest.Milestone.MilestoneId != "" {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
