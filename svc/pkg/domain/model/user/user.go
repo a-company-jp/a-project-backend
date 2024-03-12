@@ -2,6 +2,7 @@ package user
 
 type User struct {
 	UserId        ID
+	FirebaseUID   string
 	Username      string
 	Firstname     string
 	Lastname      string
