@@ -33,7 +33,7 @@ func main() {
 		gen.FieldRelateModel(
 			field.Many2Many,
 			"Tags",
-			model.UserTag{},
+			model.Tag{},
 			&field.RelateConfig{
 				RelateSlice: true,
 				GORMTag: field.GormTag{}.

@@ -2,6 +2,7 @@ package user
 
 type User struct {
 	UserId        ID
+	FirebaseUID   string
 	Username      string
 	Firstname     string
 	Lastname      string
@@ -9,7 +10,7 @@ type User struct {
 	LastnameKana  string
 	StatusMessage string
 	Tags          []Tag
-	IconImageHash IconID
+	IconImageHash *IconID
 }
 
 type ID string
