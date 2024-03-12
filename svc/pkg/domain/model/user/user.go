@@ -9,7 +9,7 @@ type User struct {
 	LastnameKana  string
 	StatusMessage string
 	Tags          []Tag
-	IconImageHash IconID
+	IconImageHash *IconID
 }
 
 type ID string
