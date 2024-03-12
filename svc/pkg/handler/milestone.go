@@ -124,3 +124,16 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 		c.Data(201, "application/octet-stream", nil)
 	}
 }
+
+// DeleteMileStone マイルストーンの削除
+func (m MileStone) DeleteMileStone() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mileStoneId := milestone.ID(c.Param("id"))
+		err := m.mileStoneCommand.Delete([]milestone.ID{mileStoneId})
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		c.Data(200, "application/octet-stream", nil)
+	}
+}
