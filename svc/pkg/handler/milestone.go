@@ -32,8 +32,11 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 
 		var milestoneCreateRequest pb_out.MilestoneCreateRequest
 		err = proto.Unmarshal(data, &milestoneCreateRequest)
-		if err != nil || milestoneCreateRequest.Milestone.MilestoneId != "" {
+		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+		if milestoneCreateRequest.Milestone.MilestoneId != "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "milestone id is not empty"})
 		}
 
 		beginDate, err := pkg_time.FromString(milestoneCreateRequest.Milestone.BeginDate)
