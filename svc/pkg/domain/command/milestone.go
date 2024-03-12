@@ -1,7 +1,9 @@
 package command
 
+import "a-project-backend/svc/pkg/domain/model/milestone"
+
 type Milestone interface {
-	Create(*Milestone) error
-	Update(Milestone) error
-	Delete([]string) error
+	Create(*milestone.Milestone) error
+	Update(milestone.Milestone) error
+	Delete([]milestone.ID) error
 }

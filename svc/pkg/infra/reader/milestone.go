@@ -6,14 +6,15 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"a-project-backend/svc/pkg/domain/model/user"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Milestone struct {
 	db *query.Query
 }
 
-func NewMilestone(db *query.Query) *Milestone {
-	return &Milestone{db: db}
+func NewMilestone(db *gorm.DB) *Milestone {
+	return &Milestone{db: query.Use(db)}
 }
 
 func (m Milestone) GetByID(milestoneID milestone.ID) (milestone.Milestone, error) {
