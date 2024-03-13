@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"a-project-backend/svc/pkg/domain/command"
-	"a-project-backend/svc/pkg/domain/model/milestone"
+	"a-project-backend/gen/gModel"
+	"a-project-backend/gen/gQuery"
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
-	"a-project-backend/svc/pkg/domain/model/user"
+	"gorm.io/gorm"
 	"io"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +13,14 @@ import (
 )
 
 type MileStone struct {
-	mileStoneCommand command.Milestone
+	db *gorm.DB
+	q  *gQuery.Query
 }
 
-func NewMileStone(mileStoneCommand command.Milestone) MileStone {
+func NewMileStone(db *gorm.DB) MileStone {
 	return MileStone{
-		mileStoneCommand: mileStoneCommand,
+		db: db,
+		q:  gQuery.Use(db),
 	}
 }
 
@@ -47,29 +49,28 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
-		target := milestone.Milestone{
-			ID:         milestone.ID(""),
-			UserID:     user.ID(milestoneCreateRequest.Milestone.UserId),
-			Title:      milestoneCreateRequest.Milestone.Title,
-			Content:    milestoneCreateRequest.Milestone.Content,
-			ImageID:    milestone.ImageID(milestoneCreateRequest.Milestone.ImageHash),
-			BeginDate:  beginDate,
-			FinishDate: finishDate,
+		target := gModel.Milestone{
+			MilestoneID: milestoneCreateRequest.Milestone.MilestoneId,
+			UserID:      milestoneCreateRequest.Milestone.UserId,
+			Title:       milestoneCreateRequest.Milestone.Title,
+			Content:     milestoneCreateRequest.Milestone.Content,
+			ImageHash:   "",
+			BeginDate:   int32(beginDate),
+			FinishDate:  int32(finishDate),
 		}
-		err = m.mileStoneCommand.Create(&target)
-		if err != nil {
+		if err = m.q.Milestone.Create(&target); err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
 		resp := pb_out.MilestoneCreateResponse{
 			Milestone: &pb_out.Milestone{
-				UserId:      string(target.UserID),
-				MilestoneId: string(target.ID),
+				UserId:      target.UserID,
+				MilestoneId: target.MilestoneID,
 				Title:       target.Title,
 				Content:     target.Content,
-				ImageHash:   string(target.ImageID),
-				BeginDate:   target.BeginDate.String(),
-				FinishDate:  target.FinishDate.String(),
+				ImageUrl:    nil,
+				BeginDate:   pkg_time.DateOnly(target.BeginDate).String(),
+				FinishDate:  pkg_time.DateOnly(target.FinishDate).String(),
 			},
 		}
 
