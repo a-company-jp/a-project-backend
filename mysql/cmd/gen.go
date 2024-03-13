@@ -1,7 +1,7 @@
 package main
 
 import (
-	"a-project-backend/db/model"
+	"a-project-backend/gen/gModel"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
@@ -10,8 +10,8 @@ import (
 
 func main() {
 	g := gen.NewGenerator(gen.Config{
-		OutPath:           "./db/query", // 出力パス
-		ModelPkgPath:      "./model",
+		OutPath:           "./gen/gQuery", // 出力パス
+		ModelPkgPath:      "./gModel",
 		FieldNullable:     true,
 		FieldWithIndexTag: true,
 		FieldWithTypeTag:  true,
@@ -29,11 +29,11 @@ func main() {
 	all := g.GenerateAllTable() // database to table model.
 
 	all = append(all, g.GenerateModel(
-		model.TableNameUser,
+		gModel.TableNameUser,
 		gen.FieldRelateModel(
 			field.Many2Many,
 			"Tags",
-			model.Tag{},
+			gModel.Tag{},
 			&field.RelateConfig{
 				RelateSlice: true,
 				GORMTag: field.GormTag{}.
