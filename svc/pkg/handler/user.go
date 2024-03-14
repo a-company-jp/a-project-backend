@@ -3,14 +3,22 @@ package handler
 import (
 	"a-project-backend/gen/gQuery"
 	"a-project-backend/pkg/config"
+	"a-project-backend/pkg/gcs"
 	"a-project-backend/svc/pkg/domain/model/exception"
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
+	"a-project-backend/svc/pkg/middleware"
+	"bytes"
 	"errors"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
+	"github.com/kolesa-team/go-webp/webp"
 	"github.com/openhacku-team-a/a-project-frontend/proto/golang/pb_out"
 	"gorm.io/gorm"
 )
@@ -211,4 +219,64 @@ func (h User) UpdateUserInfo() gin.HandlerFunc {
 
 		c.AbortWithStatus(200)
 	}
+}
+
+// UpdateUserIcon ユーザーアイコンの更新
+func (h User) UpdateUserIcon() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// decode
+		img, _, err := image.Decode(c.Request.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		// convert to webp
+		webpData, err := convertIMG2WEBP(img)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		// get userId
+		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
+		if !exists {
+			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
+		}
+
+		// create object name
+		now := time.Now()
+		formatted := now.Format("20060102-150405")
+		objectName := fmt.Sprintf("%s-%s", formatted, uAny.(string))
+
+		// save to storage
+		g, err := gcs.NewGCS()
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+		err = g.Upload(c, objectName, webpData)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		// save to user table
+		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(uAny.(string))).Updates(
+			map[string]interface{}{
+				"image_hash": objectName,
+			},
+		)
+
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		c.AbortWithStatus(200)
+	}
+}
+
+func convertIMG2WEBP(img image.Image) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := webp.Encode(buf, img, nil)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
