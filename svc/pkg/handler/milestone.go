@@ -6,6 +6,7 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"io"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 		target := gModel.Milestone{
-			MilestoneID: milestoneCreateRequest.Milestone.MilestoneId,
+			MilestoneID: uuid.New().String(),
 			UserID:      milestoneCreateRequest.Milestone.UserId,
 			Title:       milestoneCreateRequest.Milestone.Title,
 			Content:     milestoneCreateRequest.Milestone.Content,
