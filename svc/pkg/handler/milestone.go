@@ -116,7 +116,7 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
-		c.Data(200, "application/octet-stream", nil)
+		c.AbortWithStatus(200)
 	}
 }
 
@@ -132,6 +132,6 @@ func (m MileStone) DeleteMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
-		c.Data(200, "application/octet-stream", nil)
+		c.AbortWithStatus(200)
 	}
 }

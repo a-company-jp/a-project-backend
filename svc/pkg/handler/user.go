@@ -209,6 +209,6 @@ func (h User) UpdateUserInfo() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
-		c.Data(200, "application/octet-stream", nil)
+		c.AbortWithStatus(200)
 	}
 }
