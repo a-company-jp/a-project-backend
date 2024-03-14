@@ -27,7 +27,7 @@ func IssueJWT(claims jwt.Claims, secret string) (string, error) {
 
 func Verify(j string, secret string) (*jwt.StandardClaims, error) {
 	token, err := jwt.ParseWithClaims(j, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return "", errors.New("UNEXPECTED SIGNING METHOD")
 		}
 		return []byte(secret), nil
