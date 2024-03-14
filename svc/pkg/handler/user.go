@@ -7,6 +7,7 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"errors"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/openhacku-team-a/a-project-frontend/proto/golang/pb_out"
@@ -30,6 +31,7 @@ func NewUser(db *gorm.DB) User {
 	}
 }
 
+// GetUserInfo ユーザー情報の単体取得
 func (h User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Param("user_id")
