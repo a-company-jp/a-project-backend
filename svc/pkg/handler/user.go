@@ -18,7 +18,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
-	"github.com/kolesa-team/go-webp/webp"
+	"github.com/nickalie/go-webpbin"
 	"github.com/openhacku-team-a/a-project-frontend/proto/golang/pb_out"
 	"gorm.io/gorm"
 )
@@ -272,7 +272,7 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 
 func convertIMG2WEBP(img image.Image) ([]byte, error) {
 	buf := new(bytes.Buffer)
-	err := webp.Encode(buf, img, nil)
+	err := webpbin.Encode(buf, img)
 	if err != nil {
 		return nil, err
 	}
