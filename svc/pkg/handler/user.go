@@ -7,6 +7,7 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
@@ -171,5 +172,43 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 			return
 		}
 		c.Data(200, "application/octet-stream", respData)
+	}
+}
+
+// UpdateUserInfo ユーザー情報の更新
+func (h User) UpdateUserInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := c.Param("id")
+		if userId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
+		}
+
+		data, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		var userInfoUpdateRequest pb_out.UserInfoUpdateRequest
+		err = proto.Unmarshal(data, &userInfoUpdateRequest)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(userId)).Updates(
+			map[string]interface{}{
+				"username":       userInfoUpdateRequest.UserData.Username,
+				"firstname":      userInfoUpdateRequest.UserData.Firstname,
+				"lastname":       userInfoUpdateRequest.UserData.Lastname,
+				"firstname_kana": userInfoUpdateRequest.UserData.FirstnameKana,
+				"lastname_kana":  userInfoUpdateRequest.UserData.LastnameKana,
+				"status_message": userInfoUpdateRequest.UserData.StatusMessage,
+			},
+		)
+
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		c.Data(200, "application/octet-stream", nil)
 	}
 }
