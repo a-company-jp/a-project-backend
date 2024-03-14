@@ -11,7 +11,9 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/golang/protobuf v1.5.4
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
+	github.com/kolesa-team/go-webp v1.0.4
 	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240314173204-e56aa4935b25
 	github.com/sergi/go-diff v1.3.1
 	github.com/stretchr/testify v1.8.4
@@ -50,7 +52,6 @@ require (
 	github.com/gocraft/dbr/v2 v2.7.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -60,7 +61,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
-	github.com/kolesa-team/go-webp v1.0.4 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
