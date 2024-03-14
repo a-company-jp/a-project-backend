@@ -72,7 +72,7 @@ func (a auth) VerifyUser() gin.HandlerFunc {
 		}
 		_, err = a.q.User.WithContext(c).Where(gQuery.User.FirebaseUID.Eq(result.UserID)).First()
 		if err != nil {
-			if errors.Is(err, exception.ErrNotFound) {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// 存在しなければ、作成する
 				err := a.q.User.WithContext(c).Create(&gModel.User{
 					UserID:      uuid.New().String(),
