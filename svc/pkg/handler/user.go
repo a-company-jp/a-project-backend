@@ -245,7 +245,7 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		// create object name
 		now := time.Now()
 		formatted := now.Format("20060102-150405")
-		objectName := fmt.Sprintf("%s-%s", formatted, uAny.(string))
+		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, uAny.(string), formatted)
 
 		// save to storage
 		g, err := gcs.NewGCS()
