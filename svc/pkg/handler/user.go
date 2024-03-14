@@ -26,6 +26,7 @@ import (
 type User struct {
 	db *gorm.DB
 	q  *gQuery.Query
+	g  *gcs.GCS
 }
 
 const (
@@ -33,10 +34,11 @@ const (
 	GCSMilestoneImageFolder = "milestone_img"
 )
 
-func NewUser(db *gorm.DB) User {
+func NewUser(db *gorm.DB, g *gcs.GCS) User {
 	return User{
 		db: db,
 		q:  gQuery.Use(db),
+		g:  g,
 	}
 }
 
@@ -248,11 +250,7 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, uAny.(string), formatted)
 
 		// save to storage
-		g, err := gcs.NewGCS()
-		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-		}
-		err = g.Upload(c, objectName, webpData)
+		err = h.g.Upload(c, objectName, webpData)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
