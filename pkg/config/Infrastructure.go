@@ -16,7 +16,7 @@ type MySQLDB struct {
 	Host       string `yaml:"host"`
 	Port       string `yaml:"port"`
 	UnixSocket string `yaml:"unix_socket"`
-	User       string `yaml:"user"`
+	User       string `yaml:"username"`
 	Password   string `yaml:"password"`
 	DBName     string `yaml:"db_name"`
 }
