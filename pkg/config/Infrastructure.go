@@ -12,9 +12,11 @@ type GoogleCloud struct {
 }
 
 type MySQLDB struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"db_name"`
+	Protocol   string `yaml:"protocol"`
+	Host       string `yaml:"host"`
+	Port       string `yaml:"port"`
+	UnixSocket string `yaml:"unix_socket"`
+	User       string `yaml:"user"`
+	Password   string `yaml:"password"`
+	DBName     string `yaml:"db_name"`
 }
