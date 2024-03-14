@@ -2,6 +2,7 @@ package main
 
 import (
 	"a-project-backend/pkg/config"
+	"a-project-backend/pkg/gcs"
 	"a-project-backend/svc/pkg/handler"
 	"a-project-backend/svc/pkg/middleware"
 	"fmt"
@@ -25,10 +26,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database, err: %v", err)
 	}
+	g, err := gcs.NewGCS()
+	if err != nil {
+		log.Fatalf("failed to connect to GCS, err: %v", err)
+	}
 
 	engine := gin.Default()
 	apiV1 := engine.Group("/api/v1")
-	if err := Implement(apiV1, db); err != nil {
+	if err := Implement(apiV1, db, g); err != nil {
 		log.Fatalf("Failed to start server... %v", err)
 		return
 	}
@@ -39,14 +44,14 @@ func main() {
 	}
 }
 
-func Implement(rg *gin.RouterGroup, db *gorm.DB) error {
+func Implement(rg *gin.RouterGroup, db *gorm.DB, g *gcs.GCS) error {
 	middlewareCROS := middleware.NewCORS()
 	middlewareCROS.ConfigureCORS(rg)
 
 	middlewareAuth := middleware.NewAuth(db)
 	authRg := rg.Use(middlewareAuth.VerifyUser())
 
-	userHandler := handler.NewUser(db)
+	userHandler := handler.NewUser(db, g)
 	authRg.Handle("GET", "/user/info", userHandler.GetUserInfo())
 	return nil
 }
