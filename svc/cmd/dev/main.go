@@ -14,13 +14,27 @@ import (
 func main() {
 
 	conf := config.Get()
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		conf.Infrastructure.MySQLDB.User,
-		conf.Infrastructure.MySQLDB.Password,
-		conf.Infrastructure.MySQLDB.Host,
-		conf.Infrastructure.MySQLDB.Port,
-		conf.Infrastructure.MySQLDB.DBName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var dbUrl string
+	switch conf.Infrastructure.MySQLDB.Protocol {
+	case "tcp":
+		dbUrl = fmt.Sprintf("%s:%s@%s(%s:%s)/%s?parseTime=true&loc=Asia%%2FTokyo&charset=utf8mb4&parseTime=True",
+			conf.Infrastructure.MySQLDB.User,
+			conf.Infrastructure.MySQLDB.Password,
+			"tcp",
+			conf.Infrastructure.MySQLDB.Host,
+			conf.Infrastructure.MySQLDB.Port,
+			conf.Infrastructure.MySQLDB.DBName)
+	case "unix":
+		dbUrl = fmt.Sprintf("%s:%s@%s(%s)/%s?parseTime=true&loc=Asia%%2FTokyo&charset=utf8mb4&parseTime=True",
+			conf.Infrastructure.MySQLDB.User,
+			conf.Infrastructure.MySQLDB.Password,
+			"unix",
+			conf.Infrastructure.MySQLDB.UnixSocket,
+			conf.Infrastructure.MySQLDB.DBName)
+	default:
+		log.Fatalf("invalid protocol: %s", conf.Infrastructure.MySQLDB.Protocol)
+	}
+	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to database, err: %v", err)
 	}
