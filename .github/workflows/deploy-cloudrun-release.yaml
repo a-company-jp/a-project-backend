@@ -1,0 +1,68 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: 'projects/218648927193/locations/global/workloadIdentityPools/default-pool/providers/provider-github'
+          service_account: 'gh-actions-backend@openhacku-team-a.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: Authorize Docker
+        id: docker-auth
+        uses: docker/login-action@v3
+        with:
+          username: 'oauth2accesstoken'
+          password: ${{ steps.auth.outputs.access_token }}
+          registry: asia-northeast1-docker.pkg.dev
+
+      - name: create .env file
+        run: |
+          echo "ENV_LOCATION=./setting-release.yaml" > .env
+          echo "${{ secrets.ENV_YAML }}" > ./setting-release.yaml
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: asia-northeast1-docker.pkg.dev/openhacku-team-a/release/backend:latest
+          context: .
+          file: ./cloudrun/Dockerfile
+
+      - name: Download Cloud Run Service YAML
+        run: |
+          gcloud run services describe backend-release --format yaml --region asia-northeast1 > ./cloudrun/service.yaml
+
+      # replace github_sha field to latest commit sha. Changing spec.template is required to deploy new revision.
+      # reference: https://cloud.google.com/run/docs/deploying?hl=ja#revision -- check yaml tab.
+      - name: Change some property of service.yaml
+        run: |
+          sed -i "s/github_sha: .*/github_sha: ${{ github.sha }}/g" ./cloudrun/service.yaml
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          region: "asia-northeast1"
+          metadata: "./cloudrun/service.yaml"

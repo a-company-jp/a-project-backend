@@ -1,8 +1,9 @@
 DB_NAME = $(shell cat .env | grep DB_NAME | cut -d = -f 2)
 DB_USER = $(shell cat .env | grep DB_USER | cut -d = -f 2)
 DB_PASSWORD = $(shell cat .env | grep DB_PASS | cut -d = -f 2)
+DB_PORT = $(shell cat .env | grep DB_PORT | cut -d = -f 2)
 
-DSN = mysql://$(DB_USER):$(DB_PASSWORD)@tcp(127.0.0.1:3306)/$(DB_NAME)?parseTime=true
+DSN = mysql://$(DB_USER):$(DB_PASSWORD)@tcp(127.0.0.1:$(DB_PORT))/$(DB_NAME)?parseTime=true
 
 .PHONY: create_migration
 
