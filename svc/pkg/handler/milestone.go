@@ -6,6 +6,7 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"io"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 		target := gModel.Milestone{
-			MilestoneID: milestoneCreateRequest.Milestone.MilestoneId,
+			MilestoneID: uuid.New().String(),
 			UserID:      milestoneCreateRequest.Milestone.UserId,
 			Title:       milestoneCreateRequest.Milestone.Title,
 			Content:     milestoneCreateRequest.Milestone.Content,
@@ -87,6 +88,11 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 // UpdateMileStone マイルストーンの更新
 func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		mileStoneId := c.Param("id")
+		if mileStoneId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
+		}
+
 		data, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
@@ -96,9 +102,6 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 		err = proto.Unmarshal(data, &milestoneUpdateRequest)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-		}
-		if milestoneUpdateRequest.Milestone.MilestoneId != "" {
-			c.AbortWithStatusJSON(500, gin.H{"error": "milestone id is not empty"})
 		}
 
 		_, err = m.q.Milestone.WithContext(c).Where(m.q.Milestone.MilestoneID.Eq(milestoneUpdateRequest.Milestone.MilestoneId)).Updates(
@@ -113,7 +116,7 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
-		c.Data(200, "application/octet-stream", nil)
+		c.AbortWithStatus(200)
 	}
 }
 
@@ -129,6 +132,6 @@ func (m MileStone) DeleteMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
 
-		c.Data(200, "application/octet-stream", nil)
+		c.AbortWithStatus(200)
 	}
 }

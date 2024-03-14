@@ -7,6 +7,8 @@ import (
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
 	"errors"
 	"fmt"
+	"io"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/openhacku-team-a/a-project-frontend/proto/golang/pb_out"
@@ -30,6 +32,7 @@ func NewUser(db *gorm.DB) User {
 	}
 }
 
+// GetUserInfo ユーザー情報の単体取得
 func (h User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Param("user_id")
@@ -95,5 +98,117 @@ func (h User) GetUserInfo() gin.HandlerFunc {
 			return
 		}
 		c.Data(200, "application/octet-stream", respData)
+	}
+}
+
+// GetUserInfos ユーザー情報の全件取得
+func (h User) GetUserInfos() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// conf
+		conf := config.Get()
+
+		// ユーザー取得
+		users, err := h.q.User.Find()
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		// レスポンス作成
+		var resp pb_out.UserInfosResponse
+		for _, user := range users {
+			// Tag
+			tags := make([]*pb_out.Tag, len(user.Tags))
+			for i, t := range user.Tags {
+				tags[i] = &pb_out.Tag{
+					TagId:   t.TagID,
+					TagName: t.TagName,
+				}
+			}
+
+			// milestone取得
+			ms, err := h.q.Milestone.Where(gQuery.Milestone.UserID.Eq(user.UserID)).Find()
+			if err != nil {
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			}
+
+			// response方に変換
+			var milestones []*pb_out.Milestone
+			for _, m := range ms {
+				imgUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSMilestoneImageFolder, m.ImageHash)
+				milestones = append(milestones, &pb_out.Milestone{
+					MilestoneId: m.MilestoneID,
+					UserId:      m.UserID,
+					Title:       m.Title,
+					Content:     m.Content,
+					ImageUrl:    &imgUrl,
+					BeginDate:   pkg_time.DateOnly(m.BeginDate).String(),
+					FinishDate:  pkg_time.DateOnly(m.FinishDate).String(),
+				})
+			}
+
+			iconUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSUserIconFolder, user.IconImageHash)
+
+			resp.UserInfoResponses = append(resp.UserInfoResponses, &pb_out.UserInfoResponse{
+				UserData: &pb_out.UserData{
+					UserId:        user.UserID,
+					Username:      user.Username,
+					Firstname:     user.Firstname,
+					Lastname:      user.Lastname,
+					FirstnameKana: user.FirstnameKana,
+					LastnameKana:  user.LastnameKana,
+					StatusMessage: user.StatusMessage,
+					Tag:           tags,
+					IconUrl:       &iconUrl,
+				},
+				Milestones: milestones,
+			})
+		}
+
+		respData, err := proto.Marshal(&resp)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.Data(200, "application/octet-stream", respData)
+	}
+}
+
+// UpdateUserInfo ユーザー情報の更新
+func (h User) UpdateUserInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := c.Param("id")
+		if userId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
+		}
+
+		data, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		var userInfoUpdateRequest pb_out.UserInfoUpdateRequest
+		err = proto.Unmarshal(data, &userInfoUpdateRequest)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(userId)).Updates(
+			map[string]interface{}{
+				"username":       userInfoUpdateRequest.UserData.Username,
+				"firstname":      userInfoUpdateRequest.UserData.Firstname,
+				"lastname":       userInfoUpdateRequest.UserData.Lastname,
+				"firstname_kana": userInfoUpdateRequest.UserData.FirstnameKana,
+				"lastname_kana":  userInfoUpdateRequest.UserData.LastnameKana,
+				"status_message": userInfoUpdateRequest.UserData.StatusMessage,
+			},
+		)
+
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		c.AbortWithStatus(200)
 	}
 }

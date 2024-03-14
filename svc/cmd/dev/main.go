@@ -5,10 +5,11 @@ import (
 	"a-project-backend/svc/pkg/handler"
 	"a-project-backend/svc/pkg/middleware"
 	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 )
 
 func main() {
@@ -42,7 +43,7 @@ func Implement(rg *gin.RouterGroup, db *gorm.DB) error {
 	middlewareCROS := middleware.NewCORS()
 	middlewareCROS.ConfigureCORS(rg)
 
-	middlewareAuth := middleware.NewAuth()
+	middlewareAuth := middleware.NewAuth(db)
 	authRg := rg.Use(middlewareAuth.VerifyUser())
 
 	userHandler := handler.NewUser(db)
