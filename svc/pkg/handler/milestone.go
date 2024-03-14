@@ -4,8 +4,9 @@ import (
 	"a-project-backend/gen/gModel"
 	"a-project-backend/gen/gQuery"
 	"a-project-backend/svc/pkg/domain/model/pkg_time"
-	"gorm.io/gorm"
 	"io"
+
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
@@ -100,24 +101,14 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": "milestone id is not empty"})
 		}
 
-		beginDate, err := pkg_time.FromString(milestoneUpdateRequest.Milestone.BeginDate)
-		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-		}
-		finishDate, err := pkg_time.FromString(milestoneUpdateRequest.Milestone.FinishDate)
-		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-		}
-		target := milestone.Milestone{
-			ID:         milestone.ID(""),
-			UserID:     user.ID(milestoneUpdateRequest.Milestone.UserId),
-			Title:      milestoneUpdateRequest.Milestone.Title,
-			Content:    milestoneUpdateRequest.Milestone.Content,
-			ImageID:    milestone.ImageID(milestoneUpdateRequest.Milestone.ImageHash),
-			BeginDate:  beginDate,
-			FinishDate: finishDate,
-		}
-		err = m.mileStoneCommand.Update(target)
+		_, err = m.q.Milestone.WithContext(c).Where(m.q.Milestone.MilestoneID.Eq(milestoneUpdateRequest.Milestone.MilestoneId)).Updates(
+			map[string]interface{}{
+				"title":       milestoneUpdateRequest.Milestone.Title,
+				"content":     milestoneUpdateRequest.Milestone.Content,
+				"begin_date":  milestoneUpdateRequest.Milestone.BeginDate,
+				"finish_date": milestoneUpdateRequest.Milestone.FinishDate,
+			},
+		)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
@@ -129,8 +120,11 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 // DeleteMileStone マイルストーンの削除
 func (m MileStone) DeleteMileStone() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mileStoneId := milestone.ID(c.Param("id"))
-		err := m.mileStoneCommand.Delete([]milestone.ID{mileStoneId})
+		mileStoneId := c.Param("id")
+		if mileStoneId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
+		}
+		_, err := m.q.Milestone.WithContext(c).Where(m.q.Milestone.MilestoneID.Eq(mileStoneId)).Delete()
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
