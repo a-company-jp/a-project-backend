@@ -46,7 +46,7 @@ func NewUser(db *gorm.DB, g *gcs.GCS) User {
 func (h User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Param("user_id")
-		u, err := h.q.User.Where(gQuery.User.UserID.Eq(userID)).First()
+		u, err := h.q.User.Where(h.q.User.UserID.Eq(userID)).First()
 		if err != nil {
 			if errors.Is(err, exception.ErrNotFound) {
 				c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
@@ -55,7 +55,7 @@ func (h User) GetUserInfo() gin.HandlerFunc {
 			}
 		}
 
-		ms, err := h.q.Milestone.Where(gQuery.Milestone.UserID.Eq(userID)).Find()
+		ms, err := h.q.Milestone.Where(h.q.Milestone.UserID.Eq(userID)).Find()
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		}
@@ -136,7 +136,7 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 			}
 
 			// milestone取得
-			ms, err := h.q.Milestone.Where(gQuery.Milestone.UserID.Eq(user.UserID)).Find()
+			ms, err := h.q.Milestone.Where(h.q.Milestone.UserID.Eq(user.UserID)).Find()
 			if err != nil {
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			}

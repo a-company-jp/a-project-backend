@@ -47,7 +47,7 @@ func (a auth) VerifyUser() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, "user_id is null")
 			return
 		}
-		_, err = a.q.User.WithContext(c).Where(gQuery.User.FirebaseUID.Eq(result.UserID)).First()
+		_, err = a.q.User.WithContext(c).Where(a.q.User.FirebaseUID.Eq(result.UserID)).First()
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// 存在しなければ、作成する
