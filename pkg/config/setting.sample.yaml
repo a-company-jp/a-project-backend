@@ -17,8 +17,10 @@ infrastructure:
     use_credentials_file: true
     credentials_file_path: /dev/null
   mysql:
+    protocol: tcp
     host: localhost
     port: 1234
+    unix_socket: /cloudsql/some-project-id:asia-northeast1:instance-name
     username: shion
     password: ifeelluckytoday
     database: shionDB

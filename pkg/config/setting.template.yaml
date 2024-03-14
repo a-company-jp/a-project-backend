@@ -17,8 +17,10 @@ infrastructure:
     use_credentials_file:
     credentials_file_path:
   mysql:
+    protocol:
     host:
     port:
+    unix_socket:
     username:
     password:
     database:
