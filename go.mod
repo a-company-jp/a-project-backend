@@ -62,7 +62,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240312183838-7a089611e009 // indirect
+	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240314173204-e56aa4935b25 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
