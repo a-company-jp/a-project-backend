@@ -46,13 +46,16 @@ func main() {
 	}
 
 	engine := gin.Default()
+	engine.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 	apiV1 := engine.Group("/api/v1")
 	if err := Implement(apiV1, db, g); err != nil {
 		log.Fatalf("Failed to start server... %v", err)
 		return
 	}
 
-	if err := engine.Run("localhost:8080"); err != nil {
+	if err := engine.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server... %v", err)
 		return
 	}
