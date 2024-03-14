@@ -12,7 +12,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/golang/protobuf v1.5.4
 	github.com/joho/godotenv v1.5.1
-	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240312183838-7a089611e009
+	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240314173204-e56aa4935b25
 	github.com/sergi/go-diff v1.3.1
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/api v0.169.0
