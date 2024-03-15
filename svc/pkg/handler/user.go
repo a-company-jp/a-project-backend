@@ -42,6 +42,79 @@ func NewUser(db *gorm.DB, g *gcs.GCS) User {
 	}
 }
 
+// GetMe Meユーザーの取得
+func (h User) GetMe() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
+		if !exists {
+			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
+		}
+
+		u, err := h.q.User.Where(h.q.User.FirebaseUID.Eq(uAny.(string))).First()
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
+			} else {
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			}
+		}
+
+		tags := make([]*pb_out.Tag, len(u.Tags))
+		for i, t := range u.Tags {
+			tags[i] = &pb_out.Tag{
+				TagId:   t.TagID,
+				TagName: t.TagName,
+			}
+		}
+
+		ms, err := h.q.Milestone.Where(h.q.Milestone.UserID.Eq(u.UserID)).Find()
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
+		conf := config.Get()
+
+		var milestones []*pb_out.Milestone
+		for _, m := range ms {
+			imgUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSMilestoneImageFolder, m.ImageHash)
+			milestones = append(milestones, &pb_out.Milestone{
+				MilestoneId: m.MilestoneID,
+				UserId:      m.UserID,
+				Title:       m.Title,
+				Content:     m.Content,
+				ImageUrl:    &imgUrl,
+				BeginDate:   pkg_time.DateOnly(m.BeginDate).String(),
+				FinishDate:  pkg_time.DateOnly(m.FinishDate).String(),
+			})
+		}
+
+		iconUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSUserIconFolder, u.IconImageHash)
+
+		resp := pb_out.UserInfoResponse{
+			UserData: &pb_out.UserData{
+				UserId:        u.UserID,
+				Username:      u.Username,
+				Firstname:     u.Firstname,
+				Lastname:      u.Lastname,
+				FirstnameKana: u.FirstnameKana,
+				LastnameKana:  u.LastnameKana,
+				StatusMessage: u.StatusMessage,
+				Tag:           tags,
+				IconUrl:       &iconUrl,
+			},
+			Milestones: milestones,
+		}
+		respData, err := proto.Marshal(&resp)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.Data(200, "application/octet-stream", respData)
+	}
+}
+
 // GetUserInfo ユーザー情報の単体取得
 func (h User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -188,7 +261,7 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 // UpdateUserInfo ユーザー情報の更新
 func (h User) UpdateUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userId := c.Param("id")
+		userId := c.Param("user_id")
 		if userId == "" {
 			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
@@ -239,15 +312,15 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		}
 
 		// get userId
-		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
-		if !exists {
-			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
+		userId := c.Param("user_id")
+		if userId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
 
 		// create object name
 		now := time.Now()
 		formatted := now.Format("20060102-150405")
-		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, uAny.(string), formatted)
+		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, userId, formatted)
 
 		// save to storage
 		err = h.g.Upload(c, objectName, webpData)
@@ -256,7 +329,7 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		}
 
 		// save to user table
-		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(uAny.(string))).Updates(
+		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(userId)).Updates(
 			map[string]interface{}{
 				"image_hash": objectName,
 			},

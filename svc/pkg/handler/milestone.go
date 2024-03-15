@@ -88,7 +88,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 // UpdateMileStone マイルストーンの更新
 func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mileStoneId := c.Param("id")
+		mileStoneId := c.Param("milestone_id")
 		if mileStoneId == "" {
 			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
@@ -123,7 +123,7 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 // DeleteMileStone マイルストーンの削除
 func (m MileStone) DeleteMileStone() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mileStoneId := c.Param("id")
+		mileStoneId := c.Param("milestone_id")
 		if mileStoneId == "" {
 			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
