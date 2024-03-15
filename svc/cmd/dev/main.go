@@ -36,15 +36,13 @@ func main() {
 	default:
 		log.Fatalf("invalid protocol: %s", conf.Infrastructure.MySQLDB.Protocol)
 	}
+
+	fmt.Println("confのDBName: ", conf.Infrastructure.MySQLDB.DBName)
+
 	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to database, err: %v", err)
 	}
-
-	// 現在接続されているデータベース名を取得
-	var dbName string
-	db.Raw("SELECT DATABASE()").Scan(&dbName)
-	fmt.Println("接続されているデータベース名:", dbName)
 
 	g, err := gcs.NewGCS()
 	if err != nil {
