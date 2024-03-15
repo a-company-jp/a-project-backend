@@ -261,7 +261,7 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 // UpdateUserInfo ユーザー情報の更新
 func (h User) UpdateUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userId := c.Param("id")
+		userId := c.Param("user_id")
 		if userId == "" {
 			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
@@ -312,15 +312,15 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		}
 
 		// get userId
-		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
-		if !exists {
-			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
+		userId := c.Param("user_id")
+		if userId == "" {
+			c.AbortWithStatusJSON(500, gin.H{"error": "id should not be null"})
 		}
 
 		// create object name
 		now := time.Now()
 		formatted := now.Format("20060102-150405")
-		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, uAny.(string), formatted)
+		objectName := fmt.Sprintf("%s/%s-%s", GCSUserIconFolder, userId, formatted)
 
 		// save to storage
 		err = h.g.Upload(c, objectName, webpData)
@@ -329,7 +329,7 @@ func (h User) UpdateUserIcon() gin.HandlerFunc {
 		}
 
 		// save to user table
-		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(uAny.(string))).Updates(
+		_, err = h.q.User.WithContext(c).Where(h.q.User.UserID.Eq(userId)).Updates(
 			map[string]interface{}{
 				"image_hash": objectName,
 			},
