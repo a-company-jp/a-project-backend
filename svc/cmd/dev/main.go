@@ -72,9 +72,9 @@ func Implement(rg *gin.RouterGroup, db *gorm.DB, g *gcs.GCS) error {
 	milestoneHandler := handler.NewMileStone(db)
 
 	authRg.Handle("GET", "/user/info/:user_id", userHandler.GetUserInfo())
-	authRg.Handle("GET", "/user/infos/", userHandler.GetUserInfos())
+	authRg.Handle("GET", "/user/infos", userHandler.GetUserInfos())
 	authRg.Handle("PUT", "/user", userHandler.UpdateUserInfo())
-	authRg.Handle("PUT", "/user", userHandler.UpdateUserIcon())
+	authRg.Handle("PUT", "/user/icon", userHandler.UpdateUserIcon())
 	authRg.Handle("POST", "/milestone/:id", milestoneHandler.PostMileStone())
 	authRg.Handle("PUT", "/milestone/:id", milestoneHandler.UpdateMileStone())
 	authRg.Handle("DELETE", "/milestone/:id", milestoneHandler.DeleteMileStone())
