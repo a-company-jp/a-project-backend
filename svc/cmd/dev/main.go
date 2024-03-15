@@ -37,8 +37,6 @@ func main() {
 		log.Fatalf("invalid protocol: %s", conf.Infrastructure.MySQLDB.Protocol)
 	}
 
-	fmt.Println("confのDBName: ", conf.Infrastructure.MySQLDB.DBName)
-
 	db, err := gorm.Open(mysql.Open(dbUrl), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to database, err: %v", err)
