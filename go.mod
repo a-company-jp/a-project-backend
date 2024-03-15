@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/nickalie/go-webpbin v0.0.0-20220110095747-f10016bf2dc1
-	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240314181934-9841d9309d5f
+	github.com/openhacku-team-a/a-project-frontend v0.0.0-20240315155448-578a60b8094e
 	github.com/sergi/go-diff v1.3.1
 	google.golang.org/api v0.169.0
 	gopkg.in/yaml.v3 v3.0.1
