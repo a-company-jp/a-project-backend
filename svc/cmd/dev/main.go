@@ -73,6 +73,7 @@ func Implement(rg *gin.RouterGroup, db *gorm.DB, g *gcs.GCS) error {
 	userHandler := handler.NewUser(db, g)
 	milestoneHandler := handler.NewMileStone(db)
 
+	authRg.Handle("GET", "/user/info/me", userHandler.GetMe())
 	authRg.Handle("GET", "/user/info/:user_id", userHandler.GetUserInfo())
 	authRg.Handle("GET", "/user/infos", userHandler.GetUserInfos())
 	authRg.Handle("PUT", "/user/:user_id", userHandler.UpdateUserInfo())
