@@ -42,6 +42,59 @@ func NewUser(db *gorm.DB, g *gcs.GCS) User {
 	}
 }
 
+// GetMe Meユーザーの取得
+func (h User) GetMe() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
+		if !exists {
+			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
+		}
+
+		u, err := h.q.User.Where(h.q.User.FirebaseUID.Eq(uAny.(string))).First()
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
+			} else {
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			}
+		}
+
+		tags := make([]*pb_out.Tag, len(u.Tags))
+		for i, t := range u.Tags {
+			tags[i] = &pb_out.Tag{
+				TagId:   t.TagID,
+				TagName: t.TagName,
+			}
+		}
+
+		conf := config.Get()
+		iconUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSUserIconFolder, u.IconImageHash)
+
+		resp := pb_out.GetMeResponse{
+			UserData: &pb_out.UserData{
+				UserId:        u.UserID,
+				Username:      u.Username,
+				Firstname:     u.Firstname,
+				Lastname:      u.Lastname,
+				FirstnameKana: u.FirstnameKana,
+				LastnameKana:  u.LastnameKana,
+				StatusMessage: u.StatusMessage,
+				Tag:           tags,
+				IconUrl:       &iconUrl,
+			},
+		}
+
+		respData, err := proto.Marshal(&resp)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.Data(200, "application/octet-stream", respData)
+	}
+}
+
 // GetUserInfo ユーザー情報の単体取得
 func (h User) GetUserInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
