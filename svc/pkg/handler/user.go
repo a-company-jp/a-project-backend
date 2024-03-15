@@ -67,10 +67,30 @@ func (h User) GetMe() gin.HandlerFunc {
 			}
 		}
 
+		ms, err := h.q.Milestone.Where(h.q.Milestone.UserID.Eq(u.UserID)).Find()
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		}
+
 		conf := config.Get()
+
+		var milestones []*pb_out.Milestone
+		for _, m := range ms {
+			imgUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSMilestoneImageFolder, m.ImageHash)
+			milestones = append(milestones, &pb_out.Milestone{
+				MilestoneId: m.MilestoneID,
+				UserId:      m.UserID,
+				Title:       m.Title,
+				Content:     m.Content,
+				ImageUrl:    &imgUrl,
+				BeginDate:   pkg_time.DateOnly(m.BeginDate).String(),
+				FinishDate:  pkg_time.DateOnly(m.FinishDate).String(),
+			})
+		}
+
 		iconUrl := fmt.Sprintf("https://storage.googleapis.com/%s/%s/%s", conf.Application.GCS.BucketName, GCSUserIconFolder, u.IconImageHash)
 
-		resp := pb_out.GetMeResponse{
+		resp := pb_out.UserInfoResponse{
 			UserData: &pb_out.UserData{
 				UserId:        u.UserID,
 				Username:      u.Username,
@@ -82,8 +102,8 @@ func (h User) GetMe() gin.HandlerFunc {
 				Tag:           tags,
 				IconUrl:       &iconUrl,
 			},
+			Milestones: milestones,
 		}
-
 		respData, err := proto.Marshal(&resp)
 		if err != nil {
 			c.JSON(500, gin.H{
