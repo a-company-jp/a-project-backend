@@ -40,6 +40,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database, err: %v", err)
 	}
+
+	// 現在接続されているデータベース名を取得
+	var dbName string
+	db.Raw("SELECT DATABASE()").Scan(&dbName)
+	fmt.Println("接続されているデータベース名:", dbName)
+
 	g, err := gcs.NewGCS()
 	if err != nil {
 		log.Fatalf("failed to connect to GCS, err: %v", err)
