@@ -7,7 +7,9 @@ import (
 	"a-project-backend/svc/pkg/middleware"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -48,6 +50,34 @@ func main() {
 	}
 
 	engine := gin.Default()
+	engine.Use(cors.New(cors.Config{
+		// アクセスを許可したいアクセス元
+		AllowOrigins: []string{
+			"http://localhost:3000",
+		},
+		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
+		AllowMethods: []string{
+			"POST",
+			"GET",
+			"PUT",
+			"DELETE",
+			"OPTIONS",
+		},
+		// 許可したいHTTPリクエストヘッダ
+		AllowHeaders: []string{
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"Authorization",
+		},
+		// cookieなどの情報を必要とするかどうか
+		AllowCredentials: true,
+		// preflightリクエストの結果をキャッシュする時間
+		MaxAge: 24 * time.Hour,
+	}))
+
 	engine.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
@@ -64,8 +94,8 @@ func main() {
 }
 
 func Implement(rg *gin.RouterGroup, db *gorm.DB, g *gcs.GCS) error {
-	middlewareCROS := middleware.NewCORS()
-	middlewareCROS.ConfigureCORS(rg)
+	//middlewareCROS := middleware.NewCORS()
+	//middlewareCROS.ConfigureCORS(rg)
 
 	middlewareAuth := middleware.NewAuth(db)
 	authRg := rg.Use(middlewareAuth.VerifyUser())
