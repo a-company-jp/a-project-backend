@@ -13,6 +13,7 @@ import (
 
 const (
 	AuthorizedUserIDField = "AuthorizedUserID"
+	AuthorizedUserField   = "AuthorizedUser"
 )
 
 type auth struct {
@@ -64,6 +65,7 @@ func (a auth) VerifyUser() gin.HandlerFunc {
 		}
 
 		c.Set(AuthorizedUserIDField, u.UserID)
+		c.Set(AuthorizedUserField, *u)
 		c.Next()
 	}
 }
