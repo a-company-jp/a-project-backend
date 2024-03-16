@@ -36,25 +36,26 @@ func (a auth) VerifyUser() gin.HandlerFunc {
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		result, err := a.loginUC.Do(c, uc.LoginInput{JWT: jwt})
-		if result == nil || err != nil {
+		firebaseAuth, err := a.loginUC.Do(c, uc.LoginInput{JWT: jwt})
+		if firebaseAuth == nil || err != nil {
 			c.AbortWithError(401, err)
 			return
 		}
 
 		// Userの存在チェック
-		if result.UserID == "" {
+		if firebaseAuth.UserID == "" {
 			c.AbortWithStatusJSON(500, "user_id is null")
 			return
 		}
-		_, err = a.q.User.WithContext(c).Where(a.q.User.FirebaseUID.Eq(result.UserID)).First()
+		u, err := a.q.User.WithContext(c).Where(a.q.User.FirebaseUID.Eq(firebaseAuth.UserID)).First()
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// 存在しなければ、作成する
-				err := a.q.User.WithContext(c).Create(&gModel.User{
+				u = &gModel.User{
 					UserID:      uuid.New().String(),
-					FirebaseUID: result.UserID,
-				})
+					FirebaseUID: firebaseAuth.UserID,
+				}
+				err := a.q.User.WithContext(c).Create(u)
 				if err != nil {
 					c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 					return
@@ -62,7 +63,7 @@ func (a auth) VerifyUser() gin.HandlerFunc {
 			}
 		}
 
-		c.Set(AuthorizedUserIDField, result.UserID)
+		c.Set(AuthorizedUserIDField, u.UserID)
 		c.Next()
 	}
 }
