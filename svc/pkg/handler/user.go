@@ -254,7 +254,7 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 			})
 			return
 		}
-		c.Data(200, "application/octet-stream", respData)
+		c.Data(200, "application/x-protobuf", respData)
 	}
 }
 
