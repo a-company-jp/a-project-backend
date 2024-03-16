@@ -2,9 +2,9 @@ FROM golang:1.22-alpine3.19
 
 WORKDIR /app
 
-COPY ./main /app/main
-COPY ./.env /app/.env
-COPY ./setting-release.yaml /app/setting-release.yaml
+COPY ./ ./
+
+RUN go build -o main ./svc/cmd/dev/main.go
 
 EXPOSE 8080
 CMD ["./main"]
