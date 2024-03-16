@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"a-project-backend/gen/gModel"
 	"a-project-backend/gen/gQuery"
 	"a-project-backend/pkg/config"
 	"a-project-backend/pkg/gcs"
@@ -45,18 +46,13 @@ func NewUser(db *gorm.DB, g *gcs.GCS) User {
 // GetMe Meユーザーの取得
 func (h User) GetMe() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uAny, exists := c.Get(middleware.AuthorizedUserIDField)
+		uAny, exists := c.Get(middleware.AuthorizedUserField)
 		if !exists {
 			c.AbortWithStatusJSON(500, gin.H{"error": "userId not set"})
 		}
-
-		u, err := h.q.User.Where(h.q.User.FirebaseUID.Eq(uAny.(string))).First()
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
-			} else {
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-			}
+		u, ok := uAny.(gModel.User)
+		if !ok {
+			c.AbortWithStatusJSON(500, gin.H{"error": "user not castable"})
 		}
 
 		tags := make([]*pb_out.Tag, len(u.Tags))
