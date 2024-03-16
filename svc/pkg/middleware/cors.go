@@ -17,20 +17,26 @@ func (cr CORS) ConfigureCORS(rg *gin.RouterGroup) {
 	// this does absolutely nothing because OPTIONS request will be intercepted by the middleware,
 	// but this is needed to listen for OPTIONS requests
 	rg.OPTIONS("/*path", func(c *gin.Context) {
-		c.Status(200)
+		c.AbortWithStatus(200)
 	})
 }
 
 func (cr CORS) middleware() gin.HandlerFunc {
 	allowedOrigins := []string{cr.targetHost, "http://localhost:3000"}
 	return func(c *gin.Context) {
-		referer := c.Request.Header.Get("Referer")
+		origin := c.Request.Header.Get("Origin")
+		if origin == "" {
+			origin = c.Request.Header.Get("Referer")
+		}
 		allowedOrigin := ""
 		for _, o := range allowedOrigins {
-			if referer == o || referer == o+"/" {
-				allowedOrigin = referer
+			if origin == o || origin == o+"/" {
+				allowedOrigin = origin
 				break
 			}
+		}
+		if allowedOrigin == "" {
+			allowedOrigin = allowedOrigins[0]
 		}
 		c.Header("Access-Control-Allow-Origin", allowedOrigin)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
