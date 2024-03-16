@@ -22,18 +22,16 @@ func (cr CORS) ConfigureCORS(rg *gin.RouterGroup) {
 }
 
 func (cr CORS) middleware() gin.HandlerFunc {
-	allowedOrigins := []string{cr.targetHost, "http://localhost:3000", "https://localhost:3001"}
+	allowedOrigins := []string{cr.targetHost, "http://localhost:3000"}
 	return func(c *gin.Context) {
-		origin := c.Request.Header.Get("Origin")
-
-		var allowedOrigin string
+		referer := c.Request.Header.Get("Referer")
+		allowedOrigin := ""
 		for _, o := range allowedOrigins {
-			if origin == o {
-				allowedOrigin = o
+			if referer == o || referer == o+"/" {
+				allowedOrigin = referer
 				break
 			}
 		}
-
 		c.Header("Access-Control-Allow-Origin", allowedOrigin)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, Authorization")
