@@ -54,7 +54,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 		}
 		target := gModel.Milestone{
 			MilestoneID: uuid.New().String(),
-			UserID:      c.Param(middleware.AuthorizedUserIDField),
+			UserID:      c.GetString(middleware.AuthorizedUserIDField),
 			Title:       milestoneCreateRequest.Milestone.Title,
 			Content:     milestoneCreateRequest.Milestone.Content,
 			ImageHash:   "",
@@ -107,7 +107,7 @@ func (m MileStone) UpdateMileStone() gin.HandlerFunc {
 
 		_, err = m.q.Milestone.WithContext(c).
 			Where(m.q.Milestone.MilestoneID.Eq(milestoneUpdateRequest.Milestone.MilestoneId),
-				m.q.Milestone.UserID.Eq(c.Param(middleware.AuthorizedUserIDField)),
+				m.q.Milestone.UserID.Eq(c.GetString(middleware.AuthorizedUserIDField)),
 			).Updates(
 			map[string]interface{}{
 				"title":       milestoneUpdateRequest.Milestone.Title,
