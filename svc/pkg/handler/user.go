@@ -100,14 +100,7 @@ func (h User) GetMe() gin.HandlerFunc {
 			},
 			Milestones: milestones,
 		}
-		respData, err := proto.Marshal(&resp)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.Data(200, "application/octet-stream", respData)
+		c.ProtoBuf(200, &resp)
 	}
 }
 
@@ -169,14 +162,7 @@ func (h User) GetUserInfo() gin.HandlerFunc {
 			},
 			Milestones: milestones,
 		}
-		respData, err := proto.Marshal(&resp)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.Data(200, "application/octet-stream", respData)
+		c.ProtoBuf(200, &resp)
 	}
 }
 
@@ -242,15 +228,7 @@ func (h User) GetUserInfos() gin.HandlerFunc {
 				Milestones: milestones,
 			})
 		}
-
-		respData, err := proto.Marshal(&resp)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.Data(200, "application/x-protobuf", respData)
+		c.ProtoBuf(200, &resp)
 	}
 }
 

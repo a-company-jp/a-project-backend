@@ -82,7 +82,7 @@ func (m MileStone) PostMileStone() gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		c.Data(201, "application/octet-stream", respData)
+		c.ProtoBuf(201, respData)
 	}
 }
 
